@@ -86,14 +86,14 @@ public class PayrollProcessor {
             
             employeeHours.putIfAbsent(empId, new Double[]{0.0, 0.0, 0.0});
             Double[] values = employeeHours.get(empId);
-            values[0] += hoursWorked; // Total hours
-            values[1] += overtimeHours; // Overtime hours
-            values[2] += (double) lateMinutes; // Late minutes
+            values[0] = hoursWorked; // Total hours
+            values[1] = Math.max(0, hoursWorked - 40); // Overtime hours
+            values[2] = (double) lateMinutes; // Late minutes
         }
         for (Map.Entry<String, Double[]> entry : employeeHours.entrySet()) {
         String empId = entry.getKey();
         double totalHoursWorked = entry.getValue()[0];
-        double overtimeHours = entry.getValue()[1];
+        double overtimeHours = Math.max(0, totalHoursWorked - 40);
         int lateMinutes = entry.getValue()[2].intValue();
 
         double grossWeeklySalary = calculateGrossWeeklySalary(totalHoursWorked, overtimeHours, hourlyRate);

@@ -44,7 +44,8 @@ public class AttendanceRecord {
         // get hours worked
         
         public double getHoursWorked() {
-    return (double) java.time.Duration.between(logIn, logOut).toMinutes() / 60; // Convert to hours
+    double hours = java.time.Duration.between(logIn, logOut).toMinutes() / 60; // Convert to hours
+    return Math.max(hours, 0);
 }
     }
 
