@@ -72,32 +72,33 @@ public class PayrollProcessor {
         }   
         
        // Process Payroll based on attendance 
-        public static void processPayroll(AttendanceProcessor attendanceProcessor, double hourlyRate) {
+        public static void processPayroll(AttendanceProcessor attendanceProcessor, Employee employee) {
         List<AttendanceRecord> records = attendanceProcessor.getAttendanceRecords();
         Map<String, Double[]> employeeHours = new HashMap<>();
         // summarize hours worked per employee
         for (AttendanceRecord record : records){
             String empId = record.getEmployeeId();
             double hoursWorked = record.getHoursWorked();
-            double overtimeHours = Math.max(0, hoursWorked - 40);
             int lateMinutes = record.getLateMinutes();
             
             // store weekly totals for each employee
             
             employeeHours.putIfAbsent(empId, new Double[]{0.0, 0.0, 0.0});
             Double[] values = employeeHours.get(empId);
-            values[0] = hoursWorked; // Total hours
-            values[1] = Math.max(0, hoursWorked - 40); // Overtime hours
-            values[2] = (double) lateMinutes; // Late minutes
+            values[0] += hoursWorked; // Total hours
+            values[1] += Math.max(0, hoursWorked - 40); // Overtime hours
+            values[2] += (double) lateMinutes; // Late minutes
         }
         for (Map.Entry<String, Double[]> entry : employeeHours.entrySet()) {
         String empId = entry.getKey();
+        
+        if (empId.equals(employee.getEmployeeId())) {
         double totalHoursWorked = entry.getValue()[0];
-        double overtimeHours = Math.max(0, totalHoursWorked - 40);
+        double overtimeHours = entry.getValue()[1];
         int lateMinutes = entry.getValue()[2].intValue();
 
-        double grossWeeklySalary = calculateGrossWeeklySalary(totalHoursWorked, overtimeHours, hourlyRate);
-        double netWeeklySalary = calculateNetWeeklySalary(totalHoursWorked, overtimeHours, lateMinutes, hourlyRate);
+        double grossWeeklySalary = calculateGrossWeeklySalary(totalHoursWorked, overtimeHours, employee.getHourlyRate());
+        double netWeeklySalary = calculateNetWeeklySalary(totalHoursWorked, overtimeHours, lateMinutes, employee.getHourlyRate());
 
         System.out.println("\nPayroll for Employee: " + empId);
         System.out.println("Total Hours Worked: " + totalHoursWorked);
@@ -106,6 +107,7 @@ public class PayrollProcessor {
         System.out.println("Gross Weekly Salary: PHP " + grossWeeklySalary);
         System.out.println("Net Weekly Salary: PHP " + netWeeklySalary);
         System.out.println("=======================================");
+        }
         }
      }  
 }

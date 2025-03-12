@@ -31,11 +31,11 @@ public class AttendanceProcessor {
     attendanceRecords.clear(); // Clear previous records
     try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_FILE))) {
         String header = br.readLine(); // ✅ Skip header row
-        System.out.println(header);
+       // System.out.println(header);
 
         String line;
         while ((line = br.readLine()) != null) {
-            System.out.println(line); // ✅ Debug print to check what's being read
+          //  System.out.println(line); // ✅ Debug print to check what's being read
 
             String[] data = line.split(",");
             if (data.length < 6) { 

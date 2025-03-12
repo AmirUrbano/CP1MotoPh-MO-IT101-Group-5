@@ -8,7 +8,31 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>23</maven.compiler.release>
-        <exec.mainClass>com.mycompany.cp1project.EmployeeDetails</exec.mainClass>
+        <exec.mainClass>com.mycompany.cp1project.Main</exec.mainClass>
     </properties>
     <name>CompProg1 H1101</name>
+    <build>
+    <plugins>
+        <!-- Maven Compiler Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+            <configuration>
+                <source>17</source>
+                <target>17</target>
+            </configuration>
+        </plugin>
+
+        <!-- Maven Exec Plugin -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <mainClass>com.mycompany.cp1project.Main</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
 </project>
