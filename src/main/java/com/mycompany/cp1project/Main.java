@@ -46,10 +46,10 @@ public class Main {
                 //  Display fixed monthly salary and basic salary
                 double monthlyGross = employee.getBasicSalary() + employee.getRiceSubsidy() +
                         employee.getPhoneAllowance() + employee.getClothingAllowance();
-               //  double monthlyNet = PayrollProcessor.calculateNetMonthlySalary(monthlyGross, employee.getBasicSalary());
+               
 
                 System.out.printf("\nFixed Monthly Gross Salary: PHP %.2f\n", monthlyGross);
-               //  System.out.printf("Fixed Monthly Net Salary: PHP %.2f\n", monthlyNet);
+             
                 System.out.printf("Basic Salary: PHP %.2f\n", employee.getBasicSalary());
             } else {
                 System.out.println("\n Employee not found. Please try again.");
