@@ -14,7 +14,9 @@ public class Employee {
     String sssNumber, philHealth, tinNumber, pagIbig, status, position, supervisor;
     double basicSalary, riceSubsidy, phoneAllowance, clothingAllowance;
     double grossSemiMonthlyRate, hourlyRate;
-    
+    private double sssContribution;
+    private double philHealthContribution;
+    private double pagIbigContribution;
     // constructor to initialize employee data
     
     public double getHourlyRate() {
@@ -61,6 +63,9 @@ public class Employee {
     public String getLastName() {
     return lastName;
     }
+    public String getBirthday(){
+        return birthday;
+    }
 
     public String getPosition() {
     return position;
@@ -86,7 +91,19 @@ public class Employee {
     public double getClothingAllowance() {
     return clothingAllowance;
     }
-    
+    // Getters for SSS, PhilHealth, and Pag-Ibig
+    public double getSssContribution() {
+    return sssContribution;
+    }
+
+    public double getPhilHealthContribution() {
+    return philHealthContribution;
+    }
+
+    public double getPagIbigContribution() {
+    return pagIbigContribution;
+    }
+
     public void displayInfo() {
     System.out.println("Employee ID: " + employeeId);
     System.out.println("Name: " + firstName + " " + lastName);

@@ -3,8 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.cp1project;
-import java.util.List;
-import java.util.HashMap;
+
 import java.util.Map;
 /**
  *
@@ -37,15 +36,17 @@ public class PayrollProcessor {
         double grossSalary = calculateGrossWeeklySalary(totalHoursWorked, overtimeHours, hourlyRate);
         return grossSalary - calculateLateDeduction(lateMinutes, hourlyRate);
     }
-
-    // calculate monthly government deductions (SSS, Philhealth, Pag-ibig)
      public static double calculateMonthlyDeductions(double basicSalary) {
-        double sss = basicSalary * 0.045; // 4.5% SSS no need sssTable since lowest monthly salary is 22.5k
-        double philHealth = basicSalary * 0.015; // 3% but 1.5 Employee and 1.5 employer
-        double pagIbig = 100; // Fixed PHP 100 Pag-IBIG contribution
+        double sss = basicSalary * 0.045;
+        double philHealth = basicSalary * 0.015;
+        double pagIbig = 100;
         return sss + philHealth + pagIbig;
      }
-    
+        // Calculate monthly government deductions (divide by 4 for weekly)
+     
+       public static double calculateWeeklyDeductions(double basicSalary) {
+        return calculateMonthlyDeductions(basicSalary) / 4;
+     }
     
     // compute Monthly Withholding Tax
    public static double calculateMonthlyWithholdingTax(double grossMonthlySalary, double monthlyDeductions) {
@@ -63,66 +64,63 @@ public class PayrollProcessor {
         } else {
             return 200833 + (taxableIncome - 666667) * 0.35;
         
-   }  } 
-         // Compute Net Monthly Salary (Includes Monthly Deductions & Tax)
-        public static double calculateNetMonthlySalary(double grossMonthlySalary, double basicSalary) {
-        double monthlyDeductions = calculateMonthlyDeductions(basicSalary);
-        double withholdingTax = calculateMonthlyWithholdingTax(grossMonthlySalary, monthlyDeductions);
-        return grossMonthlySalary - monthlyDeductions - withholdingTax;
         }   
-        
-       // Process Payroll based on attendance 
-        public static void processPayroll(AttendanceProcessor attendanceProcessor, Employee employee) {
-        List<AttendanceRecord> records = attendanceProcessor.getAttendanceRecords();
-        Map<String, Double[]> employeeHours = new HashMap<>();
-        // summarize hours worked per employee
-        for (AttendanceRecord record : records){
-            String empId = record.getEmployeeId();
-            double hoursWorked = record.getHoursWorked();
-            int lateMinutes = record.getLateMinutes();
-            
-            // store weekly totals for each employee
-            
-            employeeHours.putIfAbsent(empId, new Double[]{0.0, 0.0, 0.0});
-            Double[] values = employeeHours.get(empId);
-            values[0] += hoursWorked; // Total hours
-            values[1] += Math.max(0, hoursWorked - 40); // Overtime hours
-            values[2] += (double) lateMinutes; // Late minutes
+   }
+        // Compute weekly Withholding tax (divide by 4)
+        public static double calculateWeeklyWithholdingTax(double grossWeeklySalary, double weeklyDeductions) {
+        double taxableIncome = grossWeeklySalary - weeklyDeductions;
+        if (taxableIncome <= 20832 / 4) {
+        return 0;
+         } else if (taxableIncome <= 33333 / 4) {
+        return (taxableIncome - (20833 / 4)) * 0.20;
+        } else if (taxableIncome <= 66667 / 4) {
+        return (2500 / 4) + (taxableIncome - (33333 / 4)) * 0.25;
+        } else if (taxableIncome <= 166667 / 4) {
+        return (10833 / 4) + (taxableIncome - (66667 / 4)) * 0.30;
+        } else if (taxableIncome <= 666667 / 4) {
+        return (40833 / 4) + (taxableIncome - (166667 / 4)) * 0.32;
+        } else {
+        return (200833 / 4) + (taxableIncome - (666667 / 4)) * 0.35;
         }
-        for (Map.Entry<String, Double[]> entry : employeeHours.entrySet()) {
-        String empId = entry.getKey();
+   }
+        public static double calculateNetMonthlySalary(double grossMonthlySalary, double totalDeductions) {
+            double netSalary = grossMonthlySalary - totalDeductions;
+            return Math.max(netSalary, 0);
         
-        if (empId.equals(employee.getEmployeeId())) {
+}
+
+      // Process weekly payroll summary
+    public static void processWeeklyPayroll(AttendanceProcessor attendanceProcessor, Employee employee) {
+         System.out.println("\n🟢 Processing payroll for employee ID: " + employee.getEmployeeId() +
+                       " | Name: " + employee.getFirstName() + " " + employee.getLastName());
+         
+    Map<Integer, Double[]> weeklyHours = attendanceProcessor.getWeeklyHours(employee.getEmployeeId());
+
+    for (Map.Entry<Integer, Double[]> entry : weeklyHours.entrySet()) {
+        int weekNumber = entry.getKey();
         double totalHoursWorked = entry.getValue()[0];
         double overtimeHours = entry.getValue()[1];
         int lateMinutes = entry.getValue()[2].intValue();
+        System.out.println("️ Processing Week " + weekNumber + " | Total Hours: " + totalHoursWorked + " | Overtime: " + overtimeHours + " | Late Minutes: " + lateMinutes);
 
+        
         double grossWeeklySalary = calculateGrossWeeklySalary(totalHoursWorked, overtimeHours, employee.getHourlyRate());
-        double netWeeklySalary = calculateNetWeeklySalary(totalHoursWorked, overtimeHours, lateMinutes, employee.getHourlyRate());
-
-        System.out.println("\nPayroll for Employee: " + empId);
-        System.out.println("Total Hours Worked: " + totalHoursWorked);
-        System.out.println("Overtime Hours: " + overtimeHours);
-        System.out.println("Late Minutes: " + lateMinutes);
-        System.out.println("Gross Weekly Salary: PHP " + grossWeeklySalary);
-        System.out.println("Net Weekly Salary: PHP " + netWeeklySalary);
-        System.out.println("=======================================");
-        }
-        }
-     }  
+        double weeklyDeductions = calculateWeeklyDeductions(employee.getBasicSalary());
+        double withholdingTax = calculateWeeklyWithholdingTax(grossWeeklySalary, weeklyDeductions);
+        double netWeeklySalary = calculateNetWeeklySalary(totalHoursWorked, overtimeHours, lateMinutes, employee.getHourlyRate()) - weeklyDeductions - withholdingTax;
+System.out.println(" Fetching weekly hours for employee ID: " + employee.getEmployeeId());
+if (weeklyHours.isEmpty()) {
+    System.out.println(" No attendance data found for employee ID: " + employee.getEmployeeId());
+} else {
+    System.out.println(" Data found. Processing payroll...");
 }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
+        System.out.println("\n -->️ Week " + weekNumber);
+        System.out.println("Total Hours Worked: " + String.format("%.2f", totalHoursWorked));
+        System.out.println("Overtime Hours: " + String.format("%.2f", overtimeHours));
+        System.out.println("Late Minutes: " + lateMinutes);
+        System.out.println("Weekly Gross Salary: PHP " + String.format("%.2f", grossWeeklySalary));
+        System.out.println("Net Weekly Salary (after deductions): PHP " + String.format("%.2f", netWeeklySalary));
+    }
+}
+     } 
