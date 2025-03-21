@@ -91,7 +91,7 @@ public class PayrollProcessor {
 
       // Process weekly payroll summary
     public static void processWeeklyPayroll(AttendanceProcessor attendanceProcessor, Employee employee) {
-         System.out.println("\n🟢 Processing payroll for employee ID: " + employee.getEmployeeId() +
+         System.out.println("\n Processing payroll for employee ID: " + employee.getEmployeeId() +
                        " | Name: " + employee.getFirstName() + " " + employee.getLastName());
          
     Map<Integer, Double[]> weeklyHours = attendanceProcessor.getWeeklyHours(employee.getEmployeeId());
@@ -108,12 +108,12 @@ public class PayrollProcessor {
         double weeklyDeductions = calculateWeeklyDeductions(employee.getBasicSalary());
         double withholdingTax = calculateWeeklyWithholdingTax(grossWeeklySalary, weeklyDeductions);
         double netWeeklySalary = calculateNetWeeklySalary(totalHoursWorked, overtimeHours, lateMinutes, employee.getHourlyRate()) - weeklyDeductions - withholdingTax;
-System.out.println(" Fetching weekly hours for employee ID: " + employee.getEmployeeId());
-if (weeklyHours.isEmpty()) {
-    System.out.println(" No attendance data found for employee ID: " + employee.getEmployeeId());
-} else {
-    System.out.println(" Data found. Processing payroll...");
-}
+        System.out.println(" Fetching weekly hours for employee ID: " + employee.getEmployeeId());
+        if (weeklyHours.isEmpty()) {
+          System.out.println(" No attendance data found for employee ID: " + employee.getEmployeeId());
+        } else {
+        System.out.println(" Data found. Processing payroll...");
+        }
 
         System.out.println("\n -->️ Week " + weekNumber);
         System.out.println("Total Hours Worked: " + String.format("%.2f", totalHoursWorked));

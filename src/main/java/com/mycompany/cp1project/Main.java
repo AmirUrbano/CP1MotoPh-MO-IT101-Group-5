@@ -14,7 +14,7 @@ public class Main {
         EmployeeDetails employeeDetails = new EmployeeDetails();
         AttendanceProcessor attendanceProcessor = new AttendanceProcessor();
 
-        // ✅ Load attendance data ONCE at the beginning
+        // Load attendance data ONCE at the beginning
         attendanceProcessor.loadAttendance();
 
         System.out.println("\n========================================");
@@ -39,17 +39,17 @@ public class Main {
                 System.out.println("Status: " + employee.getStatus());
                 System.out.printf("Hourly Rate: PHP %.2f\n", employee.getHourlyRate());
 
-                // ✅ Call the new `displayWeeklyPayroll()` method to handle all salary calculations and display
+                // Call the new displayWeeklyPayroll()` method to handle all salary calculations and display
                 double govDeductions = (employee.getSssContribution() + employee.getPhilHealthContribution() + employee.getPagIbigContribution()) / 4;
                 attendanceProcessor.displayWeeklyPayroll(empId, employee.getHourlyRate(), govDeductions);
 
-                // ✅ Display fixed monthly salary and basic salary
+                //  Display fixed monthly salary and basic salary
                 double monthlyGross = employee.getBasicSalary() + employee.getRiceSubsidy() +
                         employee.getPhoneAllowance() + employee.getClothingAllowance();
-                double monthlyNet = PayrollProcessor.calculateNetMonthlySalary(monthlyGross, employee.getBasicSalary());
+               //  double monthlyNet = PayrollProcessor.calculateNetMonthlySalary(monthlyGross, employee.getBasicSalary());
 
                 System.out.printf("\nFixed Monthly Gross Salary: PHP %.2f\n", monthlyGross);
-                System.out.printf("Fixed Monthly Net Salary: PHP %.2f\n", monthlyNet);
+               //  System.out.printf("Fixed Monthly Net Salary: PHP %.2f\n", monthlyNet);
                 System.out.printf("Basic Salary: PHP %.2f\n", employee.getBasicSalary());
             } else {
                 System.out.println("\n Employee not found. Please try again.");

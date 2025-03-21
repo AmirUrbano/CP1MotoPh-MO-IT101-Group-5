@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
-
-
+import java.time.DayOfWeek;
+import java.time.Month;
 
     public class AttendanceProcessor {
     private final List<AttendanceRecord> attendanceRecords = new ArrayList<>();
@@ -29,55 +29,50 @@ import java.time.LocalDate;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private static final LocalTime GRACE_PERIOD_END = LocalTime.of(8, 10);
 
-    private LocalDate baseDate; //  Store the earliest recorded date
+    private LocalDate baseDate;
 
     public void loadAttendance() {
-    attendanceRecords.clear();
+        attendanceRecords.clear();
 
-    try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_FILE))) {
-        String header = br.readLine(); // Skip header
-        String line;
+        try (BufferedReader br = new BufferedReader(new FileReader(ATTENDANCE_FILE))) {
+            String header = br.readLine(); // Skip header
+            String line;
 
-        while ((line = br.readLine()) != null) {
-            String[] data = line.split(",");
-            if (data.length < 6) {
-                System.out.println("Skipping invalid row: " + line);
-                continue;
-            }
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length < 6) {
+                    System.out.println("Skipping invalid row: " + line);
+                    continue;
+                }
 
-            String empNum = data[0].trim();
-            String dateAttendance = data[3].trim();               
-            LocalTime logInTime = LocalTime.parse(data[4].trim(), TIME_FORMATTER);
-            LocalTime logOutTime = LocalTime.parse(data[5].trim(), TIME_FORMATTER);
+                String empNum = data[0].trim();
+                String dateAttendance = data[3].trim();
+                LocalTime logInTime = LocalTime.parse(data[4].trim(), TIME_FORMATTER);
+                LocalTime logOutTime = LocalTime.parse(data[5].trim(), TIME_FORMATTER);
 
-            // ✅ Define attendanceDate BEFORE using it
-            LocalDate attendanceDate = LocalDate.parse(dateAttendance, DATE_FORMATTER);
+                LocalDate attendanceDate = LocalDate.parse(dateAttendance, DATE_FORMATTER);
 
-            // ✅ Set base date as the earliest recorded date
-            if (baseDate == null || attendanceDate.isBefore(baseDate)) {
-                baseDate = attendanceDate;
-            }
+                //  Set base date as the earliest recorded date
+                if (baseDate == null || attendanceDate.isBefore(baseDate)) {
+                    baseDate = attendanceDate;
+                }
 
-            boolean isLate = logInTime.isAfter(GRACE_PERIOD_END);
-            int lateMinutes = isLate ? (int) java.time.Duration.between(GRACE_PERIOD_END, logInTime).toMinutes() : 0;
-            double hrsWorked = java.time.Duration.between(logInTime, logOutTime).toMinutes() / 60.0;
+                boolean isLate = logInTime.isAfter(GRACE_PERIOD_END);
+                int lateMinutes = isLate ? (int) java.time.Duration.between(GRACE_PERIOD_END, logInTime).toMinutes() : 0;
+                double hrsWorked = java.time.Duration.between(logInTime, logOutTime).toMinutes() / 60.0;
 
-            //  Set the correct week number relative to baseDate
-            int weekNumber = (int) ChronoUnit.WEEKS.between(baseDate, attendanceDate) + 1;
+                //  Keep original week number calculation
+                int weekNumber = (int) ChronoUnit.WEEKS.between(baseDate, attendanceDate) + 1;
 
-            //  Pass weekNumber to the constructor
+                //  Pass weekNumber to the constructor
                 AttendanceRecord record = new AttendanceRecord(
-                empNum, dateAttendance, logInTime, logOutTime,
-                isLate, lateMinutes, hrsWorked, weekNumber // Add weekNumber
-            );
-
-            attendanceRecords.add(record);
+                        empNum, dateAttendance, logInTime, logOutTime,
+                        isLate, lateMinutes, hrsWorked, weekNumber);
+                attendanceRecords.add(record);
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading attendance data: " + e.getMessage());
         }
-    } catch (IOException e) {
-        System.out.println("Error loading attendance data: " + e.getMessage());
-    }
-    
-            
     }
 
     //  Method to get weekly hours per employee
@@ -119,49 +114,92 @@ import java.time.LocalDate;
         return weeklyHours;
     }
 
-    public List<AttendanceRecord> getAttendanceRecords() {
-        return attendanceRecords;
+    //  Method to get month name
+    public String getMonthName(int weekNumber) {
+        LocalDate startOfWeek = baseDate.plusWeeks(weekNumber - 1);
+        return Month.of(startOfWeek.getMonthValue()).name();
     }
 
-    // ✅ Method to display weekly payroll
+    //  Method to get week range (e.g., "June 3 - June 9")
+    public String getWeekRange(int weekNumber) {
+    LocalDate startOfWeek = baseDate.plusWeeks(weekNumber - 1).with(DayOfWeek.MONDAY);
+    LocalDate endOfWeek = startOfWeek.with(DayOfWeek.SUNDAY);
+
+    //  STOP at December 31, 2024
+    if (endOfWeek.isAfter(LocalDate.of(2024, 12, 31))) {
+        endOfWeek = LocalDate.of(2024, 12, 31);
+    }
+
+    return String.format("%s - %s",
+            startOfWeek.format(DATE_FORMATTER),
+            endOfWeek.format(DATE_FORMATTER));
+}
+
+    // Updated displayWeeklyPayroll() to stop after December 31, 2024
     public void displayWeeklyPayroll(String employeeId, double hourlyRate, double govDeductions) {
         Map<Integer, Double[]> weeklyHours = getWeeklyHours(employeeId);
         if (weeklyHours.isEmpty()) {
-            System.out.println("\nNo attendance records found for this employee.");
-            return;
+        System.out.println("\nNo attendance records found for this employee.");
+        return;
         }
 
         double totalMonthlyGross = 0;
         double totalMonthlyNet = 0;
+        String currentMonth = "";
 
         System.out.println("\n========================================");
 
-        for (int week : weeklyHours.keySet()) {
-            Double[] values = weeklyHours.get(week);
-            double regularHours = values[0];
-            double overtimeHours = values[1];
-            double lateMinutes = values[2];
+    for (int week : weeklyHours.keySet()) {
+        Double[] values = weeklyHours.get(week);
+        double regularHours = values[0];
+        double overtimeHours = values[1];
+        double lateMinutes = values[2];
 
-            double grossWeeklySalary = (regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.25);
-            double lateDeduction = (lateMinutes / 60) * hourlyRate;
-            double netWeeklySalary = grossWeeklySalary - lateDeduction - govDeductions;
+        double grossWeeklySalary = (regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.25);
+        double lateDeduction = (lateMinutes / 60) * hourlyRate;
+        double netWeeklySalary = grossWeeklySalary - lateDeduction - govDeductions;
 
-            totalMonthlyGross += grossWeeklySalary;
-            totalMonthlyNet += netWeeklySalary;
+        //  Get the month name and week range
+        String monthName = getMonthName(week);
+        String weekRange = getWeekRange(week);
 
-            // ✅ Display week breakdown
-            System.out.printf("Week %d\n", week);
-            System.out.printf("- Total Hours Worked: %.2f\n", regularHours);
-            System.out.printf("- Overtime Hours: %.2f\n", overtimeHours);
-            System.out.printf("- Late Minutes: %.0f\n", lateMinutes);
-            System.out.printf("- Weekly Gross Salary: PHP %.2f\n", grossWeeklySalary);
-            System.out.printf("- Weekly Net Salary: PHP %.2f (with government deductions)\n\n", netWeeklySalary);
+        //  STOP processing after December 31, 2024
+        LocalDate endOfWeek = baseDate.plusWeeks(week - 1).with(DayOfWeek.SUNDAY);
+        if (endOfWeek.isAfter(LocalDate.of(2024, 12, 31))) {
+            break;
         }
 
-        // ✅ Display total for the month
-        System.out.printf("Total Monthly Gross Salary: PHP %.2f\n", totalMonthlyGross);
-        System.out.printf("Total Monthly Net Salary: PHP %.2f\n", totalMonthlyNet);
+        //  If month changes, display the header
+        if (!monthName.equals(currentMonth)) {
+            if (!currentMonth.isEmpty()) {
+                // ✅ Display total for previous month (remove "?" symbol)
+                System.out.printf("\n Total Monthly Gross Salary: PHP %.2f\n", totalMonthlyGross);
+                System.out.printf(" Total Monthly Net Salary: PHP %.2f\n", totalMonthlyNet);
+            }
+            System.out.printf("\nMonth of %s:\n", monthName);
+            currentMonth = monthName;
+            totalMonthlyGross = 0;
+            totalMonthlyNet = 0;
+        }
 
-        System.out.println("========================================");
+        //  Display weekly breakdown
+        System.out.printf("\n Week %d (%s)\n", week, weekRange);
+        System.out.printf("-> Total Hours Worked: %.2f\n", regularHours);
+        System.out.printf("-> Overtime Hours: %.2f\n", overtimeHours);
+        System.out.printf("-> Late Minutes: %.0f\n", lateMinutes);
+        System.out.printf("-> Weekly Gross Salary: PHP %.2f\n", grossWeeklySalary);
+        System.out.printf("-> Weekly Net Salary: PHP %.2f\n", netWeeklySalary);
+
+        totalMonthlyGross += grossWeeklySalary;
+        totalMonthlyNet += netWeeklySalary;
     }
+
+    //  Display final total for last month
+    if (!currentMonth.isEmpty()) {
+        System.out.printf("\n Total Monthly Gross Salary: PHP %.2f\n", totalMonthlyGross);
+        System.out.printf(" Total Monthly Net Salary: PHP %.2f\n", totalMonthlyNet);
+    }
+
+    System.out.println("\n========================================");
 }
+    }
