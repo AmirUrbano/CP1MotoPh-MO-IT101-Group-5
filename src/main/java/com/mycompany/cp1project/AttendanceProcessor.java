@@ -172,7 +172,7 @@ import java.time.Month;
         //  If month changes, display the header
         if (!monthName.equals(currentMonth)) {
             if (!currentMonth.isEmpty()) {
-                // ✅ Display total for previous month (remove "?" symbol)
+                //  Display total for previous month (remove "?" symbol)
                 System.out.printf("\n Total Monthly Gross Salary: PHP %.2f\n", totalMonthlyGross);
                 System.out.printf(" Total Monthly Net Salary: PHP %.2f\n", totalMonthlyNet);
             }
@@ -184,12 +184,13 @@ import java.time.Month;
 
         //  Display weekly breakdown
         System.out.printf("\n Week %d (%s)\n", week, weekRange);
+        System.out.println("----------------------------------");
         System.out.printf("-> Total Hours Worked: %.2f\n", regularHours);
         System.out.printf("-> Overtime Hours: %.2f\n", overtimeHours);
         System.out.printf("-> Late Minutes: %.0f\n", lateMinutes);
         System.out.printf("-> Weekly Gross Salary: PHP %.2f\n", grossWeeklySalary);
         System.out.printf("-> Weekly Net Salary: PHP %.2f\n", netWeeklySalary);
-
+        System.out.println("----------------------------------");
         totalMonthlyGross += grossWeeklySalary;
         totalMonthlyNet += netWeeklySalary;
     }
