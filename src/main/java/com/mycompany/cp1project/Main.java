@@ -5,17 +5,17 @@
 package com.mycompany.cp1project;
 
 
-
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         EmployeeDetails employeeDetails = new EmployeeDetails();
-        AttendanceProcessor attendanceProcessor = new AttendanceProcessor();
+        AttendanceProcessor attendanceProcessor = AttendanceProcessor.getInstance();
+        PayrollProcessor payrollProcessor = new PayrollProcessor();
 
-        // Load attendance data ONCE at the beginning
-        attendanceProcessor.loadAttendance();
+        // ✅ Load attendance CSV file from project root
+        attendanceProcessor.loadAttendance("Attendance.csv");
 
         System.out.println("\n========================================");
         System.out.println("Welcome to MotoPH Payroll System!");
@@ -23,34 +23,32 @@ public class Main {
 
         while (true) {
             System.out.print("Enter Employee ID (or type 'exit' to quit): ");
-            String empId = scanner.nextLine().trim();
+            String employeeId = scanner.nextLine().trim();
 
-            if (empId.equalsIgnoreCase("exit")) {
+            if (employeeId.equalsIgnoreCase("exit")) {
                 break;
             }
 
-            Employee employee = employeeDetails.findEmployeeById(empId);
+            Employee employee = employeeDetails.findEmployeeById(employeeId);
 
             if (employee != null) {
+                employee.calculateContributions(); // Ensure deductions are ready
+
                 System.out.println("\n Employee Found:");
                 System.out.println("Name: " + employee.getFirstName() + " " + employee.getLastName());
                 System.out.println("Birthday: " + employee.getBirthday());
                 System.out.println("Position: " + employee.getPosition());
                 System.out.println("Status: " + employee.getStatus());
-                System.out.printf("Hourly Rate: PHP %.2f\n", employee.getHourlyRate());
+                double hourlyRate = employee.getHourlyRate();
+                System.out.printf("Hourly Rate: PHP %.2f\n", hourlyRate);
 
-                // Call the new displayWeeklyPayroll()` method to handle all salary calculations and display
-                double govDeductions = (employee.getSssContribution() + employee.getPhilHealthContribution() + employee.getPagIbigContribution()) / 4;
-                attendanceProcessor.displayWeeklyPayroll(empId, employee.getHourlyRate(), govDeductions);
+                System.out.print("Enter the month (1 = January, ..., 12 = December): ");
+                int month = scanner.nextInt();  
+                scanner.nextLine(); // consume newline
 
-                //  Display fixed monthly salary and basic salary
-                double monthlyGross = employee.getBasicSalary() + employee.getRiceSubsidy() +
-                        employee.getPhoneAllowance() + employee.getClothingAllowance();
-               
+                // ✅ Trigger payroll display
+                payrollProcessor.processMonthlyPayroll(employeeId, month);
 
-                System.out.printf("\nFixed Monthly Gross Salary: PHP %.2f\n", monthlyGross);
-             
-                System.out.printf("Basic Salary: PHP %.2f\n", employee.getBasicSalary());
             } else {
                 System.out.println("\n Employee not found. Please try again.");
             }
@@ -62,3 +60,4 @@ public class Main {
         scanner.close();
     }
 }
+

@@ -4,10 +4,6 @@
  */
 package com.mycompany.cp1project;
 
-/**
- *
- * @author Amir
- */
 public class Employee {
     String employeeId;
     String lastName, firstName, birthday, address, phoneNumber;
@@ -17,14 +13,8 @@ public class Employee {
     private double sssContribution;
     private double philHealthContribution;
     private double pagIbigContribution;
-    // constructor to initialize employee data
-    
-    public double getHourlyRate() {
-    return hourlyRate;
-}
-    
-    
-    
+    private double withholdingTax;
+
     public Employee(String employeeId, String lastName, String firstName, String birthday,
                     String address, String phoneNumber, String sssNumber, String philHealth,
                     String tinNumber, String pagIbig, String status, String position,
@@ -51,66 +41,41 @@ public class Employee {
         this.grossSemiMonthlyRate = grossSemiMonthlyRate;
         this.hourlyRate = hourlyRate;
     }
-    
-        // getter for employee id
-    public String getEmployeeId(){
-        return employeeId; 
-        
-    }public String getFirstName() {
-    return firstName;
+
+    public void calculateContributions() {
+        double weeklySalary = basicSalary / 2;
+        this.sssContribution = weeklySalary * 0.045;
+        this.philHealthContribution = weeklySalary * 0.025;
+        this.pagIbigContribution = weeklySalary * 0.02;
     }
 
-    public String getLastName() {
-    return lastName;
-    }
-    public String getBirthday(){
-        return birthday;
-    }
+    public double getSssContribution() { return sssContribution; }
+    public double getPhilHealthContribution() { return philHealthContribution; }
+    public double getPagIbigContribution() { return pagIbigContribution; }
+    public double getHourlyRate() { return hourlyRate; }
 
-    public String getPosition() {
-    return position;
-    }
+    public String getEmployeeId() { return employeeId; }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getBirthday() { return birthday; }
+    public String getPosition() { return position; }
+    public String getStatus() { return status; }
+    public double getBasicSalary() { return basicSalary; }
+    public double getRiceSubsidy() { return riceSubsidy; }
+    public double getPhoneAllowance() { return phoneAllowance; }
+    public double getClothingAllowance() { return clothingAllowance; }
 
-    public String getStatus() {
-    
-    return status;
-    }
-
-    public double getBasicSalary() {
-    return basicSalary;
-    }
-
-    public double getRiceSubsidy() {
-    return riceSubsidy;
-    }
-
-    public double getPhoneAllowance() {
-    return phoneAllowance;
-    }
-
-    public double getClothingAllowance() {
-    return clothingAllowance;
-    }
-    // Getters for SSS, PhilHealth, and Pag-Ibig
-    public double getSssContribution() {
-    return sssContribution;
-    }
-
-    public double getPhilHealthContribution() {
-    return philHealthContribution;
-    }
-
-    public double getPagIbigContribution() {
-    return pagIbigContribution;
-    }
+    public double getWithholdingTax() { return withholdingTax; }
+    public void setWithholdingTax(double withholdingTax) { this.withholdingTax = withholdingTax; }
 
     public void displayInfo() {
-    System.out.println("Employee ID: " + employeeId);
-    System.out.println("Name: " + firstName + " " + lastName);
-    System.out.println("Position: " + position);
-    System.out.println("Status: " + status);
-    System.out.println("Hourly Rate: PHP " + hourlyRate);
-}
-    
-    
+        System.out.println("Employee ID: " + employeeId);
+        System.out.println("Name: " + firstName + " " + lastName);
+        System.out.println("Position: " + position);
+        System.out.println("Status: " + status);
+        System.out.println("Hourly Rate: PHP " + hourlyRate);
+        System.out.println("SSS Contribution: PHP " + sssContribution);
+        System.out.println("PhilHealth Contribution: PHP " + philHealthContribution);
+        System.out.println("Pag-IBIG Contribution: PHP " + pagIbigContribution);
+    }
 }

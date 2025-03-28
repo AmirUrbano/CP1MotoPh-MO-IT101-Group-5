@@ -167,6 +167,13 @@ public class EmployeeDetails {
         }
         return null; // Return null if employee not found
     }
+// Get employee details by employee ID
+public Employee getEmployeeById(String employeeId) {
+    return employeeList.stream()
+            .filter(employee -> employee.getEmployeeId().equals(employeeId))
+            .findFirst()
+            .orElse(null);
+}
 
     
 }

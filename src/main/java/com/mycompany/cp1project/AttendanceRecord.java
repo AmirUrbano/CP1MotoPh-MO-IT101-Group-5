@@ -4,15 +4,9 @@
  */
 package com.mycompany.cp1project;
 
-
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-
-
-/**
- *
- * @author Amir
- */
+import java.time.Duration;
 
 public class AttendanceRecord {
     private String employeeId;
@@ -26,16 +20,34 @@ public class AttendanceRecord {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
+    // Full constructor (existing)
     public AttendanceRecord(String employeeId, String date, LocalTime logIn, LocalTime logOut,
-                        boolean isLate, int lateMinutes, double hoursWorked, int weekNumber) {
-    this.employeeId = employeeId;
-    this.date = date;
-    this.logIn = logIn;
-    this.logOut = logOut;
-    this.isLate = isLate;
-    this.lateMinutes = lateMinutes;
-    this.hoursWorked = hoursWorked;
-    this.weekNumber = weekNumber; 
+                             boolean isLate, int lateMinutes, double hoursWorked, int weekNumber) {
+        this.employeeId = employeeId;
+        this.date = date;
+        this.logIn = logIn;
+        this.logOut = logOut;
+        this.isLate = isLate;
+        this.lateMinutes = lateMinutes;
+        this.hoursWorked = hoursWorked;
+        this.weekNumber = weekNumber;
+    }
+
+    // ➕ Added constructor for CSV loading
+    public AttendanceRecord(String employeeId, String date, String logIn, String logOut) {
+        this.employeeId = employeeId;
+        this.date = date;
+        this.logIn = LocalTime.parse(logIn);
+        this.logOut = LocalTime.parse(logOut);
+        calculateLateAndHours();
+    }
+
+    // ➕ New method to calculate lateness and hours worked
+    private void calculateLateAndHours() {
+        LocalTime expectedLogin = LocalTime.of(9, 0); // 9:00 AM
+        this.isLate = logIn.isAfter(expectedLogin);
+        this.lateMinutes = isLate ? (int) Duration.between(expectedLogin, logIn).toMinutes() : 0;
+        this.hoursWorked = Duration.between(logIn, logOut).toMinutes() / 60.0;
     }
 
     // Getters
@@ -48,12 +60,6 @@ public class AttendanceRecord {
     public double getHoursWorked() { return hoursWorked; }
     public int getWeekNumber() { return weekNumber; }
 
-    //  Calculate week number using LocalDate and WeekFields
-  /*  private int calculateWeekNumber(String date) {
-        LocalDate parsedDate = LocalDate.parse(date, DATE_FORMATTER);
-        return parsedDate.get(WeekFields.of(java.time.DayOfWeek.MONDAY, 4).weekOfWeekBasedYear());
-    }
-    */
     @Override
     public String toString() {
         return "Employee ID: " + employeeId + ", Date: " + date + ", Log In: " + logIn + ", Log Out: " + logOut +
