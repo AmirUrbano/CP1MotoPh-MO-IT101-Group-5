@@ -16,13 +16,13 @@ public class AttendanceProcessor {
 
     private List<AttendanceRecord> attendanceRecords = new ArrayList<>();
 
-    // ✅ For parsing CSV values
+    //  For parsing CSV values
     private static final DateTimeFormatter CSV_DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("H:mm");
 
-    // ✅ For parsing internally stored ISO date strings (like "2024-06-03")
+    //  For parsing internally stored ISO date strings (like "2024-06-03")
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    // ➕ Singleton instance
+    //  Singleton instance
     private static AttendanceProcessor instance;
 
     public static AttendanceProcessor getInstance() {
@@ -32,7 +32,7 @@ public class AttendanceProcessor {
         return instance;
     }
 
-    // ✅ Load attendance records from CSV file
+    //  Load attendance records from CSV file
     public void loadAttendance(String filePath) {
     attendanceRecords.clear();
     
@@ -50,7 +50,7 @@ public class AttendanceProcessor {
 
             String[] data = line.split(",");
 
-            // ✅ Adjusted for 6 fields: ID, Last Name, First Name, Date, Time In, Time Out
+            //  Adjusted for 6 fields: ID, Last Name, First Name, Date, Time In, Time Out
             if (data.length >= 6) {
                 String employeeId = data[0];
                 LocalDate date = LocalDate.parse(data[3], CSV_DATE_FORMAT);       // Index 3 = date (MM/dd/yyyy or similar)
